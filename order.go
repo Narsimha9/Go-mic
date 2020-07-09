@@ -1,0 +1,26 @@
+package main
+
+import "context"
+
+type Order struct {
+	ID           string      `json:"id,omitempty" `
+	CustomerID   string      `json:"customer_id" binding:"required"`
+	Status       string      `json:"status" binding:"required"`
+	CreatedOn    int64       `json:"created_on,omitempty"`
+	RestaurantId string      `json:"restaurant_id" binding:"required"`
+	OrderItems   []OrderItem `json:"order_items,omitempty"`
+}
+
+type OrderItem struct {
+	ProductCode string  `json:"product_code"`
+	Name        string  `json:"name"`
+	UnitPrice   float32 `json:"unit_price"`
+	Quantity    int32   `json:"quantity"`
+}
+
+// Repository describes the persistence on order model
+type Repository interface {
+	CreateOrders(ctx context.Context, order Order) error
+	// GetOrderByID(ctx context.Context, id string) (Order, error)
+	// ChangeOrderStatus(ctx context.Context, id string, status string) error
+}
