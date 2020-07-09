@@ -6,8 +6,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/gofrs/uuid"
 )
+
+type orderService struct {
+	repository Repository
+	logger     log.Logger
+}
 
 type OrderService interface {
 	Create(ctx context.Context, order Order) (string, error)
@@ -19,21 +26,38 @@ var (
 	ErrQueryRepository = errors.New("unable to query repository")
 )
 
-type orderService struct{}
+func NewService(rep Repository, logger log.Logger) OrderService {
+	return &orderService{
+		repository: rep,
+		logger:     logger,
+	}
+}
 
-func (orderService) Create(ctx context.Context, order Order) (string, error) {
+func (o orderService) Create(ctx context.Context, order Order) (string, error) {
 	fmt.Println("Crete method implementation called")
-	// logger := log.With(s.logger, "method", "Create")
+	logger := log.With(o.logger, "method", "Create")
 	uuid, _ := uuid.NewV4()
 	id := uuid.String()
 	order.ID = id
 	order.Status = "Pending"
 	order.CreatedOn = time.Now().Unix()
+	orders := Order{
+		ID:           order.ID,
+		CustomerID:   order.CustomerID,
+		Status:       order.Status,
+		CreatedOn:    order.CreatedOn,
+		RestaurantId: order.RestaurantId,
+		OrderItems:   order.OrderItems,
+	}
 
-	// if err := s.repository.CreateOrder(ctx, order); err != nil {
-	// 	level.Error(logger).Log("err", err)
-	// 	return "", ordersvc.ErrCmdRepository
-	// }
+	if err := o.repository.CreateOrder(ctx, orders); err != nil {
+		fmt.Println("error generated")
+		level.Error(logger).Log("err", err)
+		return "", err
+	}
+
+	logger.Log("create user", id)
+
 	return id, nil
-	// return order, nil
+
 }

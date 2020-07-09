@@ -18,9 +18,8 @@ type OrderItem struct {
 	Quantity    int32   `json:"quantity"`
 }
 
-// Repository describes the persistence on order model
 type Repository interface {
-	CreateOrders(ctx context.Context, order Order) error
+	CreateOrder(ctx context.Context, order Order) error
 	// GetOrderByID(ctx context.Context, id string) (Order, error)
 	// ChangeOrderStatus(ctx context.Context, id string, status string) error
 }
